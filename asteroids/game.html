@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function cos(v) {return Math.cos(d2r(v))};
 
     var objs = [], // objs[0] это всегда корабль
-        bullets_max = 8, bullet_speed = 5, godmode_max = 120, stopped = true,
+        bullets_max = 8, bullet_speed = 5, godmode_max = 120, max_ship_speed = 3, stopped = true,
         bullets_cnt, asteroids_cnt, asteroids_max, lives, score;
 
     /*
@@ -154,6 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
             init();
         }
         else if ((e.keyCode == 38/*up*/) || (e.keyCode == 87/*W*/)) {
+            if (Math.sqrt(Math.pow(objs[0].sx, 2)+Math.pow(objs[0].sy, 2)) > max_ship_speed) return;
             snd_impulse.pause() || snd_impulse.play();
             objs[0].p = 1; // для "мигания" двигателем при ускорении меняю геометрию корабля на вариант с пламенем
             objs[0].sx += 2*sin(objs[0].a);
