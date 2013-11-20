@@ -199,8 +199,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // "заворачивание" за краем экрана
             [{x:'x', W:W.w}, {x:'y', W:W.h}].forEach(function(_) {
-                if      (S[_.x] < -((_.W>>1)+S.r)) {S[_.x] += (_.W+2*S.r)}
-                else if (S[_.x] >  ((_.W>>1)+S.r)) {S[_.x] -= (_.W+2*S.r)}
+                var limit = (_.W>>1)+S.r, diff = _.W+2*S.r;
+                if      (S[_.x] < -limit) {S[_.x] += diff}
+                else if (S[_.x] >  limit) {S[_.x] -= diff}
             });
 
             // коллизии
