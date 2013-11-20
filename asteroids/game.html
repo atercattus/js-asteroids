@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function asteroid_add(x, y, b) {
-        b = ('undefined' == typeof b) ? parseInt(R(6)+1)*10 : b;
+        b = ('undefined' == typeof b) ? parseInt(R(7)+1)*10 : b;
         // если (x,y) не указано, то прижимаю место появления астероида к краю экрана
         var _x = R(W.w) - W.w2,
             _y = R(W.h) - W.h2,
@@ -141,6 +141,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return collision;
     }
 
+    function asteroid_break(A) {
+        // осколки
+        var asize = 10*parseInt(A.b/10 - (R(2)+1));
+        if (asize > 0) {
+            for (var r = parseInt(R(2)+1); r > 0; --r) {
+                asteroid_add(A.x, A.y, asize);
+            }
+        }
+        // мусор
+        for (var r = parseInt(R(2)+3); r > 0; --r) {
+            var a = R(360);
+            obj_add(3, 2, A.x, A.y, 2, sin(a), -cos(a), 1, 0, 0, 30);
+        }
+    }
+
     document.onmousemove = function (e) {
         var v = {x:(e.pageX-W.w2-objs[0].x), y:(e.pageY-W.h2-objs[0].y)};
         objs[0].a = r2d(Math.acos(-v.y/(Math.sqrt(v.x*v.x+v.y*v.y))));
@@ -168,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // пуля вылетает из "носа" корабля, а не из его центра
         var x = S.x + S.b2*sin(S.a),
             y = S.y - S.b2*cos(S.a);
-        obj_add(2, 2, x, y, 3, bullet_speed*sin(S.a), -bullet_speed*cos(S.a), 1, 0, 10, 60);
+        obj_add(2, 2, x, y, 4, bullet_speed*sin(S.a), -bullet_speed*cos(S.a), 1, 0, 10, 60);
     };
 
     init();
@@ -214,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // маска столкновения (что с чем): "[012][12]"
                 var ab = Math.min(S.t, Sj.t)+''+Math.max(S.t, Sj.t);
                 // не проверяю столкновения: корабль+пуля, астероид+астероид, пуля+пуля
-                var ignore_ab = ['02', '11', '22'];
+                var ignore_ab = ['02', '11', '22', '03', '13', '23', '33'];
                 // проверка на ignore_ab + пересечение оболочек + точное попиксельное пересечение
                 if ((ignore_ab.indexOf(ab) == -1) && (dist(S.x, S.y, Sj.x, Sj.y) < S.r+Sj.r) && test_collision(S, Sj)) {
                     if (('01' == ab) && !godmode) { // столкновение корабля с астероидом
@@ -223,6 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             snd_damage.play();
                             godmode = godmode_max;
                             to_delete.push((1 == S.t) ? i : j);
+                            asteroid_break((1 == S.t) ? S : Sj);
                         }
                         else {
                             snd_die.play();
@@ -240,12 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         asteroids_max = parseInt(score/20) + 6;
                         // создание обломков
                         var A = (1 == S.t) ? S : Sj;
-                        var asize = 10*parseInt(A.b/10 - (R(2)+1));
-                        if (asize > 0) {
-                            for (var r = parseInt(R(2)+1); r > 0; --r) {
-                                asteroid_add(A.x, A.y, asize);
-                            }
-                        }
+                        asteroid_break(A);
 
                         may_draw = false;
                         break;
@@ -276,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.font = 'bold 12px monospace';
             ctx.fillStyle = 'white';
             ctx.fillText(Array(Math.max(lives+1, 0)).join('A '), 5, 12);
-            ctx.fillText('Score: '+score+' * '+score_multiplier+' '+Array(bullets_max-bullets_cnt+1).join('|'), 50, 12);
+            ctx.fillText('Score: '+score+' * '+score_multiplier+' '+Array(Math.max(bullets_max-bullets_cnt+1, 1)).join('|'), 50, 12);
         }
     }
 
