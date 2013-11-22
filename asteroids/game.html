@@ -11,9 +11,12 @@
     <script>
 document.addEventListener('DOMContentLoaded', function() {
     var _w=640, _h=480, W = {w:_w, h:_h, w2:_w>>1, h2:_h>>1};
-    var canvas = document.createElement('canvas'), canvas2 = document.createElement('canvas');
-    canvas.width = canvas2.width = W.w;
+    var canvas = document.createElement('canvas'), canvas2 = document.createElement('canvas'), canvas2_padding = 30;
+    canvas.width  = canvas2.width = W.w;
     canvas.height = canvas2.height = W.h;
+    canvas2.width  += 2*canvas2_padding; // canvas для детектирования столкновений расширена на величину,
+    canvas2.height += 2*canvas2_padding; //   достаточную для полной отрисовки корабля
+
     document.body.appendChild(canvas);
     var ctx = canvas.getContext('2d'), ctx2 = canvas2.getContext('2d');
     ctx.strokeStyle = 'white';
@@ -80,12 +83,13 @@ document.addEventListener('DOMContentLoaded', function() {
         obj_add(1, p, x, y, b, -x/(R(W.w)+(W.w>>2)), -y/(R(W.h)+(W.h>>2)), 1, R(360), R(8)-4, -1);
     }
 
-    function obj_draw(S, fill) {
+    function obj_draw(S, fill, padding) {
         var c = ('undefined' == typeof fill) ? ctx : ctx2;
         if (fill) {c.fillStyle = fill}
+        padding = padding||0;
 
         c.save();
-            c.translate(W.w2+S.x, W.h2+S.y);
+            c.translate(W.w2+S.x+padding, W.h2+S.y+padding);
             c.rotate(d2r(S.a));
             c.scale(S.b2, S.b2);
             c.beginPath();
@@ -119,17 +123,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function test_collision(a, b) {
         var collision = false;
         ctx2.save();
-            ctx2.fillStyle = '#000'; ctx2.fillRect(0, 0, W.w, W.h);
+            ctx2.fillStyle = '#000'; ctx2.fillRect(0, 0, W.w+2*canvas2_padding, W.h+2*canvas2_padding);
             ctx2.globalAlpha = 0.5;
-            obj_draw(a, '#F00');
-            obj_draw(b, '#0F0');
+            obj_draw(a, '#F00', canvas2_padding);
+            obj_draw(b, '#0F0', canvas2_padding);
 
             var x0 = Math.min(a.x-a.r, b.x-b.r),
                 y0 = Math.min(a.y-a.r, b.y-b.r),
                 x1 = Math.max(a.x+a.r, b.x+b.r),
                 y1 = Math.max(a.y+a.r, b.y+b.r);
 
-            var data = ctx2.getImageData(x0+W.w2, y0+W.h2, x1-x0+1, y1-y0+1).data;
+            var data = ctx2.getImageData(x0+W.w2+canvas2_padding, y0+W.h2+canvas2_padding, x1-x0+1, y1-y0+1).data;
             for (var i = data.length-4; i >= 0; i -= 4) {
                 if (data[i] && data[i+1]) {
                     collision = true;
