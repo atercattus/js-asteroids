@@ -10,7 +10,7 @@
     </style>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var _w=640, _h=480, W = {w:_w, h:_h, w2:_w>>1, h2:_h>>1};
+    var _w=window.innerWidth, _h=window.innerHeight, W = {w:_w, h:_h, w2:_w>>1, h2:_h>>1};
     var canvas = document.createElement('canvas'), canvas2 = document.createElement('canvas'), canvas2_padding = 30;
     canvas.width  = canvas2.width = W.w;
     canvas.height = canvas2.height = W.h;
